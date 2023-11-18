@@ -5,6 +5,7 @@ resource "aws_instance" "bastion_host" {
   vpc_security_group_ids = var.bastion-host-security-group 
   key_name = aws_key_pair.generated_key.key_name
   associate_public_ip_address = true
+  user_data = file ( "./modules/userdata.tpl" )
   tags = {
     Name = "bastion_host"
   }
