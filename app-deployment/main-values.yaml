@@ -1,0 +1,19 @@
+metadata:
+  name: helloapp
+  rep: 1
+
+containers:
+  - image: 253823388836.dkr.ecr.us-east-1.amazonaws.com/app-reg:v${BUILD_NUMBER}
+    name: helloapp
+    imagePullPolicy: Always
+    containerPort: 5000
+
+service:
+  name: myservice
+
+
+ports:
+  name: helloport
+  port: 5000
+  protocol: TCP
+  targetPort: 5000
