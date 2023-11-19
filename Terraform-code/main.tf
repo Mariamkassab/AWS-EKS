@@ -24,24 +24,7 @@ module "eks_nodes_security_group" {
   created_vpc_id = module.terraform_vpc.vpc_id
 
   ingress_rules = {
-    ssh = {
-      port        = 22
-      protocol    = "tcp"
-      cidr_blocks = ["0.0.0.0/0"]
-      security_group = []
-    },
-    lb = {
-      port        = 80
-      protocol    = "tcp"
-      cidr_blocks = ["0.0.0.0/0"] 
-      security_group = []
-    },
-    c = {
-      port        = 443
-      protocol    = "tcp"
-      cidr_blocks = ["0.0.0.0/0"] 
-      security_group = []
-    }
+  
   }
 
   egress_rules = { 
@@ -66,7 +49,7 @@ module "rds_security_group" {
     ec2 = {
       port        = 3306
       protocol    = "tcp"
-      cidr_blocks = ["0.0.0.0/0"]
+      cidr_blocks = ["10.0.32.0/19", "10.0.64.0/19"]
       security_group = [] 
     }
   }
@@ -92,13 +75,7 @@ module "bastion_host_security_group" {
     ssh = {
       port        = 22
       protocol    = "tcp"
-      cidr_blocks = ["0.0.0.0/0"]
-      security_group = []
-    },
-    html = {
-      port        = 80
-      protocol    = "tcp"
-      cidr_blocks = ["0.0.0.0/0"] 
+      cidr_blocks = ["0.0.0.0/0"] #only my public ip
       security_group = []
     }
   }
@@ -186,7 +163,7 @@ module "EKS-node_group" {
   cluster_name = module.EKS-cluster.eks-cluster-name
   node_group_name = var.node_group_name
   node_role_arn = module.eks-iam-roles.node-group-role-arn
-  subnet_ids = [ module.terraform_subnet.first_pri_id , module.terraform_subnet.first_pri_id ]
+  subnet_ids = [ module.terraform_subnet.first_pri_id , module.terraform_subnet.second_pri_id ]
   key_name = module.bastion-host.ssh_key_name
   depends_on = [ module.eks-iam-roles ]
 }
@@ -215,4 +192,8 @@ module "bastion-host" {
   source = "./modules/ec2-bastion-host"
   pub_subnet = module.terraform_subnet.second_pub_id
   bastion-host-security-group = [ module.bastion_host_security_group.sg_id ]
+}
+
+module "ecr_registry" {
+  source = "./modules/ECR"  
 }

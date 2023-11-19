@@ -18,9 +18,9 @@ pipeline {
                     if (params.ENV == "build") {
                         withCredentials([usernamePassword(credentialsId: 'mariam-dockerHub', usernameVariable: 'USERNAME_ITI', passwordVariable: 'PASSWORD_ITI')]) {
                             sh '''
-                                docker login -u ${USERNAME_ITI} -p ${PASSWORD_ITI}
-                                docker build -t mariamkasssab/iti_project:v${BUILD_NUMBER} .
-                                docker push mariamkasssab/iti_project:v${BUILD_NUMBER}
+                                docker build -t 253823388836.dkr.ecr.us-east-1.amazonaws.com/app-reg:v${BUILD_NUMBER} .
+                                aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 253823388836.dkr.ecr.us-               east-1.amazonaws.com
+                                docker push 253823388836.dkr.ecr.us-east-1.amazonaws.com/app-reg:v${BUILD_NUMBER}
                                 echo ${BUILD_NUMBER} > ../build.txt
                             '''
                      }

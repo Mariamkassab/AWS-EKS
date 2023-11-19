@@ -6,6 +6,7 @@ resource "aws_instance" "bastion_host" {
   key_name = aws_key_pair.generated_key.key_name
   associate_public_ip_address = true
   user_data = file ( "./modules/userdata.tpl" )
+  iam_instance_profile = aws_iam_instance_profile.ecr-access.name
   tags = {
     Name = "bastion_host"
   }
@@ -26,4 +27,29 @@ resource "aws_key_pair" "generated_key" {
 resource "local_file" "private_key_file" {
   filename = "./ec2-key.pem"
   content  = tls_private_key.tls_private_k.private_key_pem
+}
+
+resource "aws_iam_role" "ec2-role" {
+  name = "ec2-role"
+
+  assume_role_policy = jsonencode({
+    Statement = [{
+      Action = "sts:AssumeRole"
+      Effect = "Allow"
+      Principal = {
+        Service = "ec2.amazonaws.com"
+      }
+    }]
+    Version = "2012-10-17"
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "ecr-policy" {
+  policy_arn = "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryPowerUser"
+  role       = aws_iam_role.ec2-role.name
+}
+
+resource "aws_iam_instance_profile" "ecr-access" {
+  name = "ecr-access"
+  role = aws_iam_role.ec2-role.name
 }

@@ -6,5 +6,7 @@ unzip awscliv2.zip
 ./aws/install
 curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
 sudo install -o root -g root -m 0755 kubectl /usr/local/bin/kubectl
-apt install mysql-client -y
-alias k=kubectl
+#apt install mysql-client -y
+#alias k=kubectl
+#aws eks --region us-east-1 update-kubeconfig --name my-eks-cluster
+apt install docker -y
