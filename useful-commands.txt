@@ -3,6 +3,8 @@ https://dev.to/bensooraj/accessing-amazon-rds-from-aws-eks-2pc3
 https://blog.shiftasia.com/grant-access-to-aws-eks-cluster-to-bastion-host/
 
 
+
+
 mysql -h my-rds.cdg8m8mxhfr6.us-east-1.rds.amazonaws.com  -u myrdsuser -p
 
 
