@@ -1,0 +1,12 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: {{ .Values.slave_svc.svc_name }}
+  namespace: {{ .Values.name_space.name }}
+spec:
+  selector:
+    app: {{ .Values.slave_metadata.name }}
+  ports:
+  - protocol: {{ .Values.slave_svc.protocol }}
+    port: {{ .Values.slave_svc.port }}
+    targetPort: {{ .Values.slave_svc.targetPort }}

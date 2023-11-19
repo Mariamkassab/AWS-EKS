@@ -1,0 +1,97 @@
+
+master_metadata: 
+  name: jenkins
+  image: jenkins/jenkins:lts-jdk11
+  rep: 1
+
+init:
+  - name: install-docker
+    image: docker:stable
+    command: ["cp", "/usr/local/bin/docker", "/data/docker"]
+    volumename: docker
+    mountPath: /data
+
+  - name: install-kubectl
+    image: eslamkarim/jenkins-ansible-kubectl
+    command: ["cp", "/usr/local/bin/kubectl", "/data/kubectl"]
+    volumename: kubectl
+    mountPath: /data
+
+
+httpGet:
+  path: /login
+  port: 8080
+  scheme: HTTP
+  
+volumeMounts:
+  - name: docker-sock
+    subPath: 
+    mountPath: /var/run   
+  - name: data-disk
+    subPath:
+    mountPath: /var/jenkins_home
+  - name: docker
+    subPath: "docker"
+    mountPath: "/usr/local/bin/docker"
+  - name: kubectl
+    subPath: "kubectl"
+    mountPath: "/usr/local/bin/kubectl"
+  
+master_vol:
+  v1_name: docker-sock
+  path: /var/run 
+  v2_name: data-disk 
+  claimName: claim-jenkins
+  v3_name: docker
+  v4_name: kubectl
+
+   
+ports:
+  - containerPort: 8080
+    protocol: TCP
+  - containerPort: 50000
+    protocol: TCP
+
+
+name_space:
+  name: jenkins
+
+
+slave_metadata:
+  name: jenkins-ubuntu-slave
+  sa:  jenkins-deployer
+  image: mariamkassab/jenkins_slave:v3
+  rep: 1
+
+slave_svc:
+  svc_name: jenkins-ubuntu-slave-svc
+  protocol: TCP
+  port: 22
+  targetPort: 22
+
+slave_vol:
+  name: docker-sock
+  path: /var/run/docker.sock
+
+slave_vol_mount:
+  mountPath: /var/run/docker.sock
+  name: docker-sock
+
+pv:
+  name: pv-jenkins
+  storage: 10Gi
+  accessModes: ReadWriteOnce
+  path: "/root/jen"
+
+pvc:
+  name: claim-jenkins
+  storage: 10Gi
+  accessModes: ReadWriteOnce
+
+master_svc: 
+  name: jenkins-nodeport
+  protocol: TCP
+  port: 80
+  targetPort: 8080
+  nodePort: 30009
+  type: http

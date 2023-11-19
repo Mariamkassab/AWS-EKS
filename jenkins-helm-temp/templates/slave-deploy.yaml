@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.slave_metadata.name }}
+  namespace: {{ .Values.name_space.name }}
+  labels:
+    app: {{ .Values.slave_metadata.name }}
+spec:
+  replicas: {{ .Values.slave_metadata.rep }}
+  selector:
+    matchLabels:
+      app: {{ .Values.slave_metadata.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.slave_metadata.name }}
+    spec:
+      serviceAccountName: {{ .Values.slave_metadata.sa }}
+      automountServiceAccountToken: true
+      securityContext:
+            fsGroup: 0 
+            runAsUser: 0
+      containers:
+      - name: {{ .Values.slave_metadata.name }}
+        image: {{ .Values.slave_metadata.image }}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: {{ .Values.slave_svc.port }}
+        volumeMounts:
+{{- if .Values.slave_vol_mount }}
+        - mountPath: {{ .Values.slave_vol_mount.mountPath }}
+          name: {{ .Values.slave_vol_mount.name }}
+{{- end }}
+      volumes:
+{{- if .Values.slave_vol }}
+      - name: {{ .Values.slave_vol.name }}
+        hostPath:
+          path: {{ .Values.slave_vol.path }}
+{{- end }}

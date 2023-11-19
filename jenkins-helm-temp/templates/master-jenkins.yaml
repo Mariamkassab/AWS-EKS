@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: {{.Values.master_metadata.name}}
+  name: {{.Values.master_metadata.name}}
+  namespace: {{ .Values.name_space.name }}
+spec:
+  replicas: {{.Values.master_metadata.rep}}
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: {{.Values.master_metadata.name}}
+  template:
+    metadata:
+      labels:
+        app: {{.Values.master_metadata.name}}
+    spec:
+      securityContext:
+        fsGroup: 1000 
+        runAsUser: 0
+      initContainers:
+{{- range $key,$val := .Values.init }}
+      - name: {{ .name }}
+        image: {{ .image }}
+        command: {{ .command }}  
+        volumeMounts:
+        - name: {{ .volumename }}
+          mountPath: {{ .mountPath | quote }}
+{{- end}}
+      containers:
+      - image: {{.Values.master_metadata.image}}
+        imagePullPolicy: IfNotPresent
+        name: {{.Values.master_metadata.name}}
+        ports:
+{{- range $key,$val := .Values.ports }}
+        - containerPort: {{ .containerPort }}
+          protocol: {{ .protocol }}
+{{- end }}
+        readinessProbe:
+          failureThreshold: 5
+          httpGet:
+{{- with .Values.httpGet }}
+            path: {{ .path }}
+            port: {{ .port }}
+            scheme: {{ .scheme }}
+{{- end }}
+          periodSeconds: 10
+          successThreshold: 2
+          timeoutSeconds: 5
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+{{- range $key,$val := .Values.volumeMounts }}
+        - name: {{ .name }}
+          subPath: {{ .subPath }}
+          mountPath: {{ .mountPath }}   
+{{- end }}
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - hostPath:
+          path: {{ .Values.master_vol.path }} 
+          type: ""
+        name: {{ .Values.master_vol.v1_name }}
+      - name: {{ .Values.master_vol.v2_name }}  
+        persistentVolumeClaim:
+          claimName: {{ .Values.master_vol.claimName }}
+      - name: {{ .Values.master_vol.v3_name }} 
+        emptyDir: {}
+      - name: {{ .Values.master_vol.v4_name }} 
+        emptyDir: {}

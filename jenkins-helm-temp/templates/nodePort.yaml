@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.master_svc.name }}
+  namespace: {{ .Values.name_space.name }}
+spec:
+  type: NodePort
+  selector:
+    app: {{.Values.master_metadata.name}}
+  ports:
+{{- with .Values.master_svc }}
+    - protocol: TCP
+      port: {{ .port }}
+      targetPort: {{ .targetPort }}
+      nodePort: {{.nodePort }}
+      name: {{ .type }}
+{{- end}}
+   
