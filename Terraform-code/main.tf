@@ -24,7 +24,12 @@ module "eks_nodes_security_group" {
   created_vpc_id = module.terraform_vpc.vpc_id
 
   ingress_rules = {
-  
+  connect = {
+      port        = 443
+      protocol    = "tcp"
+      cidr_blocks = [] 
+      security_group = [module.bastion_host_security_group.sg_id]
+    }
   }
 
   egress_rules = { 
